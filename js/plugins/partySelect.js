@@ -2,7 +2,7 @@
 // by Jamie Geist
 // Date: 3/18/19
 /*:
-* @plugindesc Character Selector
+* @plugindesc Custom plugins for Monster Trainer
 * @author JamieGeist
 
 * @param null
@@ -33,49 +33,58 @@ checkForDayEnd = function($this){
   else {
     chooseTraining();}};
 
+//This function takes the name of the character, and the processID, and adjusts the trust of the character.
+//If the processID is 1, the character's trust is downgraded.
+//If the processID is 2, the character's trust is upgraded.
 var adjustTrust;
 adjustTrust = function(actorName, processID){
+  var actorVar;
+  switch (actorName){
+      case "Jesse":
+        actorVar = 101;
+        break;
+      case "Kirk":
+        actorVar = 101;
+        break;
+      case "Hestia":
+        actorVar = 101;
+        break;
+      case "Hellmask":
+        actorVar = 101;
+        break;
+      case "Hazel":
+        actorVar = 101;
+        break;
+      case "Tsusie":
+        actorVar = 101;
+        break;
+      case "Cassette":
+        actorVar = 101;
+        break;
+      case "Marimo":
+        actorVar = 101;
+        break;
+      case "Feliz":
+        actorVar = 101;
+        break;
+      case "Marble":
+        actorVar = 101;
+        break;}
   if (processID === 1){
-    var actorVar;
-    switch (actorName){
-        case "Jesse":
-          actorVar = 101;
-          break;
-        case "Kirk":
-          actorVar = 101;
-          break;
-        case "Hestia":
-          actorVar = 101;
-          break;
-        case "Hellmask":
-          actorVar = 101;
-          break;
-        case "Hazel":
-          actorVar = 101;
-          break;
-        case "Tsusie":
-          actorVar = 101;
-          break;
-        case "Cassette":
-          actorVar = 101;
-          break;
-        case "Marimo":
-          actorVar = 101;
-          break;
-        case "Feliz":
-          actorVar = 101;
-          break;
-        case "Marble":
-          actorVar = 101;
-          break;}
   var tempMath = $gameVariables.value(actorVar) - 3;
   $gameVariables.setValue(actorVar, tempMath);
-  $gameMessage.add("...I feel like " + actorName + " trusts me a little less...");}};
-  //ID of 1 - downgrade trust
-    //Display a thing saying that they trust you a bit less.
-  //ID of 2 - upgrade trust
-    //Display a thing saying that they trust you a bit more.
+  $gameMessage.add("...I feel like " + actorName + " trusts me a little less...");
+  }
+  if else (processID === 2){
+    var tempMath = $gameVariables.value(actorVar) + 3;
+    $gameVariables.setValue(actorVar, tempMath);
+    $gameMessage.add("...I feel like " + actorName + " trusts me a bit more...");
+  }
+};
 
+//This function sets all the charTrained values to false, letting them be trained again.
+//It also increments dayOfTheWeek, and will display a game message saying the name of the current day.
+//The function only goes to seven days, and will need to be reset.
 var goToNewDay;
 goToNewDay = function($this){
   char1trained = false;
@@ -100,6 +109,9 @@ goToNewDay = function($this){
     case 7:
     $gameMessage.add("SATURDAY");}}
 
+//This function takes in the partyID, the statID, and the drillID.
+//The partyID is the ID of the character in the party.
+//The statID is which stat will be raised. The drillID correlates to 1 for Light Drill, 10 for Heavy Drill.
 var updateStat;
 updateStat = function(partyID, statID, drillID){
   var statString;
@@ -132,6 +144,7 @@ updateStat = function(partyID, statID, drillID){
   if (stamina === 1){
     extraRep1(statID,partyID);}}
 
+//This function asks the player if they would like to execute an extra Light Drill for the selected character.
 var extraRep1;
 extraRep1 = function(statID, partyID){
   $gameTemp.clearCommonEvent(9);
@@ -151,6 +164,7 @@ extraRep1 = function(statID, partyID){
       setTimeout(function(){
         checkForDayEnd();});}});}
 
+//This function asks the player if they would like to execute either an extra Light Drill or Heavy Drill for the character.
 var extraRep2;
 extraRep2 = function(statID,partyID){
   $gameTemp.clearCommonEvent(9);
@@ -170,6 +184,7 @@ extraRep2 = function(statID,partyID){
       setTimeout(function(){
         checkForDayEnd();});}});}
 
+//Shows the icons of the characters.
 var showTraineeIcons;
 showTraineeIcons = function(id1,id2,id3,id4){
   $gameVariables.setValue(21, (id1-2));
@@ -178,6 +193,9 @@ showTraineeIcons = function(id1,id2,id3,id4){
   $gameVariables.setValue(24, (id4-2));
   $gameTemp.reserveCommonEvent(1);};
 
+
+
+//Prompts the player to select which of their four party members they should train for the day.
 var chooseTraining;
 chooseTraining = function($this){
   $gameMessage.add("Who should I schedule today?");
@@ -193,6 +211,7 @@ chooseTraining = function($this){
   $gameMessage.setChoiceCallback(function(responseIndex){
       if (responseIndex === 0){
       //They chose character A.
+      //If a charTrainer variable is set to true, it means the character has been trained that day, and cannot be selected to exercise.
         if (char1trained === true){
           setTimeout(function(){
             $gameMessage.add("I've already trained them!");
@@ -229,22 +248,64 @@ chooseTraining = function($this){
           trainChar(4);
           char4trained = true;}}});}
 
+//The actual function for sparring with a character.
+//The player is prompted to choose between the three remaining party members.
+//Then, the function raises relevant stats.
 var sparChar;
 sparChar = function(partyID){
    //We're checking to see what character we're currently scheduling.
-    if (partyID == 1){
-      $gameMap._interpreter.setupChoices([[$gameParty.members()[2].name(), $gameParty.members()[3].name(), $gameParty.members()[4].name()], 1]);
-      $gameMessage.setChoiceCallback(function(responseIndex){
-        if (responseIndex === 0){
-          setTimeout(function(){
-            //Increases the XP of our selected character.
-            $gameActors.actor($gameParty.members()[1].actorId()).gainExp(10);
+   switch(partyID){
+     case 1:
+     $gameMap._interpreter.setupChoices([[$gameParty.members()[2].name(), $gameParty.members()[3].name(), $gameParty.members()[4].name()], 1]);
+     break;
+     case 2:
+     $gameMap._interpreter.setupChoices([[$gameParty.members()[1].name(), $gameParty.members()[3].name(), $gameParty.members()[4].name()], 1]);
+     break;
+     case 3:
+     $gameMap._interpreter.setupChoices([[$gameParty.members()[2].name(), $gameParty.members()[1].name(), $gameParty.members()[4].name()], 1]);
+     break;
+     case 4:
+     $gameMap._interpreter.setupChoices([[$gameParty.members()[2].name(), $gameParty.members()[3].name(), $gameParty.members()[1].name()], 1]);
+     break;
+   }
+
+    $gameMessage.setChoiceCallback(function(responseIndex){
+            setTimeout(function(){
+            //Increases the XP of the character we're scheduling for sparring, as well as their partner.
             //We can replace this flat number with an actual variable later on.
+
+            $gameActors.actor($gameParty.members()[responseIndex].actorId()).gainExp(10);
+            $gameActors.actor($gameParty.members()[partyID].actorId()).gainExp(10);
             $gameMessage.add($gameParty.members()[partyID].name() + " gained 10 EXP!");
-            //Grab a variable here. Each character should have their own variable with their "base" stat.
-            //check variable[130 + actorID], if it == (0 thru 5), raise corresponding stat.
-            //run this for the character selected and for their training partner
-            //We're done with sparring. This will go back to the main schedule menu.
+            $gameMessage.add($gameParty.members()[responseIndex].name() + " gained 10 EXP!");
+
+            switch($gameParty.members()[partyID].name()){
+            case 'Streya':
+            //Need to find syntax for adjusting the stat.
+            break;
+            case 'Marble':
+            break;
+            case 'Cassette':
+            break;
+            case 'Tsusie':
+            break;
+            case 'Jessie':
+            break;
+            case 'Kirk':
+            break;
+            case 'Hellmask':
+            break;
+            case 'Hestia':
+            break;
+            case 'Hazel':
+            break;
+            case 'Pallas':
+            break;
+            case 'Feliz':
+            break;
+            case 'Marimo':
+            break;
+            }
 
 
             //ATK - Streya, Marble
@@ -258,8 +319,16 @@ sparChar = function(partyID){
 
             //Decrease stamina
             setTimeout(function(){
-              checkForDayEnd();});});}});}};
+              checkForDayEnd();
+            });
+            });
 
+            });
+            };
+
+//After a character has been selected to train, the player then chooses if they want to Train, Spar, or Rest.
+//For Rest and Spar, corresponding functions are called.
+//For Train, the player is asked which type of drill to execute, and then for which stat.
 var trainChar;
 trainChar = function(partyID){
   $gameVariables.setValue(25, $gameParty.members()[partyID].actorId());
